@@ -13,6 +13,7 @@ namespace Orleans.Messaging
     /// </summary>
     internal class GatewayConnection : OutgoingMessageSender
     {
+        private readonly MessageFactory messageFactory;
         internal bool IsLive { get; private set; }
         internal ProxiedMessageCenter MsgCenter { get; private set; }
 
@@ -33,12 +34,13 @@ namespace Orleans.Messaging
 
         private DateTime lastConnect;
 
-        internal GatewayConnection(Uri address, ProxiedMessageCenter mc)
-            : base("GatewayClientSender_" + address, mc.MessagingConfiguration)
+        internal GatewayConnection(Uri address, ProxiedMessageCenter mc, MessageFactory messageFactory)
+            : base("GatewayClientSender_" + address, mc.MessagingConfiguration, mc.SerializationManager)
         {
+            this.messageFactory = messageFactory;
             Address = address;
             MsgCenter = mc;
-            receiver = new GatewayClientReceiver(this);
+            receiver = new GatewayClientReceiver(this, mc.SerializationManager);
             lastConnect = new DateTime();
             IsLive = true;
         }
@@ -66,7 +68,8 @@ namespace Orleans.Messaging
             IsLive = false;
             receiver.Stop();
             base.Stop();
-            RuntimeClient.Current.BreakOutstandingMessagesToDeadSilo(Silo);
+            DrainQueue(RerouteMessage);
+            MsgCenter.RuntimeClient.BreakOutstandingMessagesToDeadSilo(Silo);
             Socket s;
             lock (Lockable)
             {
@@ -75,8 +78,7 @@ namespace Orleans.Messaging
             }
             if (s == null) return;
 
-            SocketManager.CloseSocket(s);
-            NetworkingStatisticsGroup.OnClosedGatewayDuplexSocket();
+            CloseSocket(s);
         }
 
         // passed the exact same socket on which it got SocketException. This way we prevent races between connect and disconnect.
@@ -99,13 +101,11 @@ namespace Orleans.Messaging
             }
             if (s != null)
             {
-                SocketManager.CloseSocket(s);
-                NetworkingStatisticsGroup.OnClosedGatewayDuplexSocket();
+                CloseSocket(s);
             }
             if (socket2Disconnect == s) return;
 
-            SocketManager.CloseSocket(socket2Disconnect);
-            NetworkingStatisticsGroup.OnClosedGatewayDuplexSocket();
+            CloseSocket(socket2Disconnect);
         }
 
         public void MarkAsDead()
@@ -161,7 +161,8 @@ namespace Orleans.Messaging
                         Socket = new Socket(Silo.Endpoint.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
                         Socket.Connect(Silo.Endpoint);
                         NetworkingStatisticsGroup.OnOpenedGatewayDuplexSocket();
-                        SocketManager.WriteConnectionPreemble(Socket, MsgCenter.ClientId);  // Identifies this client
+                        MsgCenter.OnGatewayConnectionOpen();
+                        SocketManager.WriteConnectionPreamble(Socket, MsgCenter.ClientId);  // Identifies this client
                         Log.Info(ErrorCode.ProxyClient_Connected, "Connected to gateway at address {0} on trial {1}.", Address, i);
                         return;
                     }
@@ -281,7 +282,7 @@ namespace Orleans.Messaging
             {
                 if (Log.IsVerbose) Log.Verbose(ErrorCode.ProxyClient_RejectingMsg, "Rejecting message: {0}. Reason = {1}", msg, reason);
                 MessagingStatisticsGroup.OnRejectedMessage(msg);
-                Message error = msg.CreateRejectionResponse(Message.RejectionTypes.Unrecoverable, reason);
+                Message error = this.messageFactory.CreateRejectionResponse(msg, Message.RejectionTypes.Unrecoverable, reason);
                 MsgCenter.QueueIncomingMessage(error);
             }
             else
@@ -289,6 +290,20 @@ namespace Orleans.Messaging
                 Log.Warn(ErrorCode.ProxyClient_DroppingMsg, "Dropping message: {0}. Reason = {1}", msg, reason);
                 MessagingStatisticsGroup.OnDroppedSentMessage(msg);
             }
+        }
+
+        private void RerouteMessage(Message msg)
+        {
+            msg.TargetActivation = null;
+            msg.TargetSilo = null;
+            MsgCenter.SendMessage(msg);
+        }
+
+        private void CloseSocket(Socket socket)
+        {
+            SocketManager.CloseSocket(socket);
+            NetworkingStatisticsGroup.OnClosedGatewayDuplexSocket();
+            MsgCenter.OnGatewayConnectionClosed();
         }
     }
 }

@@ -3,9 +3,8 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-
-using Orleans.Runtime.Scheduler;
 using Orleans.Runtime.Configuration;
+using Orleans.Runtime.Scheduler;
 
 
 namespace Orleans.Runtime
@@ -16,25 +15,23 @@ namespace Orleans.Runtime
     internal class DeploymentLoadPublisher : SystemTarget, IDeploymentLoadPublisher, ISiloStatusListener
     {
         private readonly Silo silo;
+        private readonly ISiloStatusOracle siloStatusOracle;
         private readonly ConcurrentDictionary<SiloAddress, SiloRuntimeStatistics> periodicStats;
         private readonly TimeSpan statisticsRefreshTime;
         private readonly IList<ISiloStatisticsChangeListener> siloStatisticsChangeListeners;
-        private readonly TraceLogger logger = TraceLogger.GetLogger("DeploymentLoadPublisher", TraceLogger.LoggerType.Runtime);
-
-        public static DeploymentLoadPublisher Instance { get; private set; }
-
+        private readonly Logger logger = LogManager.GetLogger("DeploymentLoadPublisher", LoggerType.Runtime);
+        
         public ConcurrentDictionary<SiloAddress, SiloRuntimeStatistics> PeriodicStatistics { get { return periodicStats; } }
 
-        public static void CreateDeploymentLoadPublisher(Silo silo, GlobalConfiguration config)
-        {
-            Instance = new DeploymentLoadPublisher(silo, config.DeploymentLoadPublisherRefreshTime);
-        }
-
-        private DeploymentLoadPublisher(Silo silo, TimeSpan freshnessTime)
+        public DeploymentLoadPublisher(
+            Silo silo,
+            ISiloStatusOracle siloStatusOracle,
+            GlobalConfiguration config)
             : base(Constants.DeploymentLoadPublisherSystemTargetId, silo.SiloAddress)
         {
             this.silo = silo;
-            statisticsRefreshTime = freshnessTime;
+            this.siloStatusOracle = siloStatusOracle;
+            statisticsRefreshTime = config.DeploymentLoadPublisherRefreshTime;
             periodicStats = new ConcurrentDictionary<SiloAddress, SiloRuntimeStatistics>();
             siloStatisticsChangeListeners = new List<ISiloStatisticsChangeListener>();
         }
@@ -48,8 +45,7 @@ namespace Orleans.Runtime
                 // Randomize PublishStatistics timer,
                 // but also upon start publish my stats to everyone and take everyone's stats for me to start with something.
                 var randomTimerOffset = random.NextTimeSpan(statisticsRefreshTime);
-                var t = GrainTimer.FromTaskCallback(PublishStatistics, null, randomTimerOffset, statisticsRefreshTime, "DeploymentLoadPublisher.PublishStatisticsTimer");
-                t.Start();
+                this.RegisterTimer(PublishStatistics, null, randomTimerOffset, statisticsRefreshTime, "DeploymentLoadPublisher.PublishStatisticsTimer");
             }
             await RefreshStatistics();
             await PublishStatistics(null);
@@ -61,7 +57,7 @@ namespace Orleans.Runtime
             try
             {
                 if(logger.IsVerbose) logger.Verbose("PublishStatistics.");
-                List<SiloAddress> members = silo.LocalSiloStatusOracle.GetApproximateSiloStatuses(true).Keys.ToList();
+                List<SiloAddress> members = this.siloStatusOracle.GetApproximateSiloStatuses(true).Keys.ToList();
                 var tasks = new List<Task>();
                 var myStats = new SiloRuntimeStatistics(silo.Metrics, DateTime.UtcNow);
                 foreach (var siloAddress in members)
@@ -91,7 +87,7 @@ namespace Orleans.Runtime
         public Task UpdateRuntimeStatistics(SiloAddress siloAddress, SiloRuntimeStatistics siloStats)
         {
             if (logger.IsVerbose) logger.Verbose("UpdateRuntimeStatistics from {0}", siloAddress);
-            if (!silo.LocalSiloStatusOracle.GetApproximateSiloStatus(siloAddress).Equals(SiloStatus.Active))
+            if (this.siloStatusOracle.GetApproximateSiloStatus(siloAddress) != SiloStatus.Active)
                 return TaskDone.Done;
 
             SiloRuntimeStatistics old;
@@ -110,7 +106,7 @@ namespace Orleans.Runtime
             await silo.LocalScheduler.RunOrQueueTask( () =>
                 {
                     var tasks = new List<Task>();
-                    List<SiloAddress> members = silo.LocalSiloStatusOracle.GetApproximateSiloStatuses(true).Keys.ToList();
+                    List<SiloAddress> members = this.siloStatusOracle.GetApproximateSiloStatuses(true).Keys.ToList();
                     foreach (var siloAddress in members)
                     {
                         var capture = siloAddress;

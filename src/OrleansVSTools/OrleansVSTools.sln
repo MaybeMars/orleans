@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
-VisualStudioVersion = 14.0.24720.0
+VisualStudioVersion = 14.0.25123.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{B888D741-4D06-4228-A2BF-DE088A9E6129}"
 	ProjectSection(SolutionItems) = preProject
@@ -27,19 +27,19 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "VB.NET", "VB.NET", "{A769E9
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "FSharp", "FSharp", "{464D872D-C9CA-4C2F-9FEC-7AC1FE071845}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VSItemTemplateGrainInterface", "VSItemTemplateGrainInterface\VSItemTemplateGrainInterface.csproj", "{4DBFB7F4-512C-4963-880A-7D1D367D5C11}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VSItemTemplateGrainInterfaceCSharp", "VSItemTemplateGrainInterfaceCSharp\VSItemTemplateGrainInterfaceCSharp.csproj", "{4DBFB7F4-512C-4963-880A-7D1D367D5C11}"
 	ProjectSection(ProjectDependencies) = postProject
 		{94D7BBD0-33AE-4CAB-A398-585281C5459A} = {94D7BBD0-33AE-4CAB-A398-585281C5459A}
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VSProjectTemplateGrainInterface", "VSProjectTemplateGrainInterface\VSProjectTemplateGrainInterface.csproj", "{94D7BBD0-33AE-4CAB-A398-585281C5459A}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VSProjectTemplateGrainInterfaceCSharp", "VSProjectTemplateGrainInterfaceCSharp\VSProjectTemplateGrainInterfaceCSharp.csproj", "{94D7BBD0-33AE-4CAB-A398-585281C5459A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VSItemTemplateGrainImplementation", "VSItemTemplateGrainImplementation\VSItemTemplateGrainImplementation.csproj", "{C434AA5A-B324-4F08-AA11-028642B96881}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VSItemTemplateGrainImplementationCSharp", "VSItemTemplateGrainImplementationCSharp\VSItemTemplateGrainImplementationCSharp.csproj", "{C434AA5A-B324-4F08-AA11-028642B96881}"
 	ProjectSection(ProjectDependencies) = postProject
 		{94D7BBD0-33AE-4CAB-A398-585281C5459A} = {94D7BBD0-33AE-4CAB-A398-585281C5459A}
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VSProjectTemplateGrainImplementation", "VSProjectTemplateGrainImplementation\VSProjectTemplateGrainImplementation.csproj", "{527A4A5D-DCF6-4483-95A3-5E3BA7FBF663}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VSProjectTemplateGrainImplementationCSharp", "VSProjectTemplateGrainImplementationCSharp\VSProjectTemplateGrainImplementationCSharp.csproj", "{527A4A5D-DCF6-4483-95A3-5E3BA7FBF663}"
 	ProjectSection(ProjectDependencies) = postProject
 		{94D7BBD0-33AE-4CAB-A398-585281C5459A} = {94D7BBD0-33AE-4CAB-A398-585281C5459A}
 	EndProjectSection
@@ -54,7 +54,7 @@ Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "VSProjectTemplateGrainImple
 		{94D7BBD0-33AE-4CAB-A398-585281C5459A} = {94D7BBD0-33AE-4CAB-A398-585281C5459A}
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VSItemTemplatePersistedGrain", "VSItemTemplatePersistedGrain\VSItemTemplatePersistedGrain.csproj", "{F37D4936-BCBC-4CF4-AC9C-6FAAF954BF94}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VSItemTemplatePersistedGrainCSharp", "VSItemTemplatePersistedGrainCSharp\VSItemTemplatePersistedGrainCSharp.csproj", "{F37D4936-BCBC-4CF4-AC9C-6FAAF954BF94}"
 	ProjectSection(ProjectDependencies) = postProject
 		{94D7BBD0-33AE-4CAB-A398-585281C5459A} = {94D7BBD0-33AE-4CAB-A398-585281C5459A}
 	EndProjectSection
@@ -64,7 +64,7 @@ Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "VSItemTemplatePersistedGrai
 		{94D7BBD0-33AE-4CAB-A398-585281C5459A} = {94D7BBD0-33AE-4CAB-A398-585281C5459A}
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VSProjectSiloHost", "VSProjectSiloHost\VSProjectSiloHost.csproj", "{8442DCB5-A97F-432C-8EF5-E0B540A6C8B6}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VSProjectSiloHostCSharp", "VSProjectSiloHostCSharp\VSProjectSiloHostCSharp.csproj", "{8442DCB5-A97F-432C-8EF5-E0B540A6C8B6}"
 	ProjectSection(ProjectDependencies) = postProject
 		{94D7BBD0-33AE-4CAB-A398-585281C5459A} = {94D7BBD0-33AE-4CAB-A398-585281C5459A}
 	EndProjectSection
@@ -87,6 +87,11 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OrleansVSTools", "OrleansVSTools\OrleansVSTools.csproj", "{E8BF3F9B-EAA4-48E9-AC31-59DE955B60EE}"
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "VSItemTemplateGrainImplementationFSharp", "VSItemTemplateGrainImplementationFSharp\VSItemTemplateGrainImplementationFSharp.fsproj", "{0F56F737-7B9D-4546-823B-BCD41565E0DE}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{1F71C0F5-F469-49A4-AE5C-9F236805D53D}"
+	ProjectSection(SolutionItems) = preProject
+		.nuget\NuGet.Config = .nuget\NuGet.Config
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
